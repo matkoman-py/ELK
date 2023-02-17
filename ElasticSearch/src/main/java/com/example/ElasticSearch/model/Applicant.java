@@ -16,16 +16,16 @@ import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 public class Applicant {
     @Id
     private String id;
-    @Field(type = FieldType.Text, searchAnalyzer = "english", analyzer = "english", store = true)
+    @Field(type = FieldType.Text, searchAnalyzer = "serbian-analyzer", analyzer = "serbian-analyzer", store = true)
     private String firstname;
-    @Field(type = FieldType.Text, searchAnalyzer = "english", analyzer = "english", store = true)
+    @Field(type = FieldType.Text, searchAnalyzer = "serbian-analyzer", analyzer = "serbian-analyzer", store = true)
     private String lastname;
     @Field(type = FieldType.Text, index = false, store = true)
     private String email;
     @Field(type = FieldType.Text, index = false, store = true)
     private String address;
-    @GeoPointField
-    private GeoPoint location;
+//    @GeoPointField
+//    private GeoPoint location;
     @Field(type = FieldType.Text, index = false, store = true)
     private String phone;
     @Field(type = FieldType.Text, store = true)

@@ -17,7 +17,7 @@ public class CV {
     @Field(type = FieldType.Nested, includeInParent = true)
     private Applicant applicant;
 
-    @Field(type = FieldType.Text, searchAnalyzer = "english", analyzer = "english")
+    @Field(type = FieldType.Text, searchAnalyzer = "serbian-analyzer", analyzer = "serbian-analyzer")
     private String content;
 
     @Field(type = FieldType.Keyword, index = false, store = true)

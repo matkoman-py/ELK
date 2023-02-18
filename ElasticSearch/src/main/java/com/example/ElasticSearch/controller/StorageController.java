@@ -1,8 +1,11 @@
 package com.example.ElasticSearch.controller;
 
+import com.example.ElasticSearch.dto.ApplicationDTO;
 import com.example.ElasticSearch.model.Applicant;
 import com.example.ElasticSearch.service.StorageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -12,13 +15,11 @@ public class StorageController {
 
     private final StorageService storageService;
 
-    @PostMapping
-    public void apply(@RequestBody Applicant applicant){
-        storageService.saveApplicant(applicant);
+    @PostMapping(consumes = { "multipart/form-data" })
+    public ResponseEntity<?> apply(@ModelAttribute ApplicationDTO applicationDTO){
+        storageService.handleApplication(applicationDTO);
+        return new ResponseEntity<>("Succesfully uploaded!", HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public Applicant apply(@PathVariable String id){
-        return  storageService.get(id);
-    }
+
 }

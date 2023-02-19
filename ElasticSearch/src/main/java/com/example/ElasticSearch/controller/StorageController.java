@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("api/storage")
+@CrossOrigin
 public class StorageController {
 
     private final StorageService storageService;

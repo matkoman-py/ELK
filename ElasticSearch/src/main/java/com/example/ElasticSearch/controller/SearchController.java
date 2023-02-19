@@ -15,6 +15,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/search")
+@CrossOrigin
 public class SearchController {
 
     private final SearchService searchService;

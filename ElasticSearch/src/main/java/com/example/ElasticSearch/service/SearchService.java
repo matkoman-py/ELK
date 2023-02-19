@@ -4,9 +4,9 @@ import com.example.ElasticSearch.dto.*;
 import com.example.ElasticSearch.model.Applicant;
 import com.example.ElasticSearch.repository.ApplicantRepository;
 import lombok.RequiredArgsConstructor;
-import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.common.unit.DistanceUnit;
 import org.elasticsearch.index.query.*;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
@@ -22,6 +22,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -44,9 +45,40 @@ public class SearchService {
         }
     }
 
+    private ResultDTO mapCVIndexToResultData(ResultDTO resultDTO, Map<String, List<String>> highlightFields) {
+        highlightFields.forEach((key, value) -> setResultDataForHighlight(resultDTO, key, value));
+        return resultDTO;
+    }
+
+    private void setResultDataForHighlight(ResultDTO resultDTO, String key, List<String> value) {
+        switch (key) {
+            case "firstname":
+                System.out.println("USAO OVDE");
+                resultDTO.setFirstName(formatHighlight(value));
+                break;
+            case "lastname":
+                resultDTO.setLastName(formatHighlight(value));
+                break;
+            case "cvContent":
+                resultDTO.setCv(formatHighlight(value));
+                break;
+        }
+    }
+
+    public String formatHighlight(List<String> highlight) {
+        StringBuilder stringBuilder = new StringBuilder();
+        highlight.forEach(highlightItem -> stringBuilder.append(highlightItem).append("<br/>"));
+        return stringBuilder.toString();
+    }
+
     public List<ResultDTO> simpleQuery(String field, String value) {
+        HighlightBuilder highlightBuilder = new HighlightBuilder();
+        highlightBuilder.preTags("<b>").postTags("</b>");
+        highlightBuilder.field("*");
+
         var searchQuery = new NativeSearchQueryBuilder()
                 .withFilter(createMatchQueryBuilder(field, value))
+                .withHighlightBuilder(highlightBuilder)
                 .build();
 
         SearchHits<Applicant> hints = elasticsearchOperations.search(searchQuery, Applicant.class, IndexCoordinates.of("applicant"));
@@ -54,7 +86,10 @@ public class SearchService {
 
         for (SearchHit<Applicant> hint : hints){
             Applicant applicant = hint.getContent();
-            found.add(ResultDTO.builder()
+            Map<String, List<String>> highlightFields = hint.getHighlightFields();
+            System.out.println("EVOO ME" + highlightFields);
+
+            ResultDTO resultDTO = ResultDTO.builder()
                     .firstName(applicant.getFirstname())
                     .lastName(applicant.getLastname())
                     .phone(applicant.getPhone())
@@ -64,11 +99,14 @@ public class SearchService {
                     .location(applicant.getLocation().toString())
                     .coverLetter(applicant.getClContent())
                     .cv(applicant.getCvContent())
-                    .build());
+                    .build();
+
+            found.add(mapCVIndexToResultData(resultDTO, highlightFields));
         }
 
         return found;
     }
+
 
     public ApiResponseDTO getLocationFromAddress(String city) {
         var url = API_URL + city;
@@ -122,11 +160,14 @@ public class SearchService {
     }
 
     public List<ResultDTO> advancedQuery(AdvancedQueryDTO request) {
+        HighlightBuilder highlightBuilder = new HighlightBuilder();
+        highlightBuilder.preTags("<b>").postTags("</b>");
+
         BoolQueryBuilder query = QueryBuilders.boolQuery();
         for (AdvancedQueryFieldDTO field : request.getQuery()){
-            QueryBuilder matcher = field.getPhrase()
-                    ? QueryBuilders.matchPhraseQuery(field.getField(), field.getValue())
-                    : QueryBuilders.matchQuery(field.getField(), field.getValue());
+            QueryBuilder matcher = createMatchQueryBuilder(field.getField(), field.getValue());
+
+            highlightBuilder.field(field.getField());
 
             if (field.getOperator().toLowerCase().equals("and")) {
                 query.must(matcher);
@@ -138,6 +179,7 @@ public class SearchService {
 
         var nativeQuery = new NativeSearchQueryBuilder()
                 .withQuery(query)
+                .withHighlightBuilder(highlightBuilder)
                 .build();
 
         var hints = elasticsearchOperations.search(nativeQuery, Applicant.class, IndexCoordinates.of("applicant"));

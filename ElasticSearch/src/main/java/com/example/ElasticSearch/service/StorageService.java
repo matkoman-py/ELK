@@ -61,7 +61,7 @@ public class StorageService {
         if (!file.isEmpty()) {
             byte[] bytes = file.getBytes();
             //sa ovom dobijas file
-            Path path = Paths.get(
+            Path path = Paths.get("src/main/resources/static/" +
                       fileName);
 
             Files.write(path, bytes);

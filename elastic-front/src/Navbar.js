@@ -12,6 +12,11 @@ export default function Navbar() {
   function handleClickSearch() {
     navigate("/search");
   }
+
+  function handleClickStatistics() {
+    navigate("/statistics");
+  }
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
@@ -21,6 +26,9 @@ export default function Navbar() {
           </Button>
           <Button color="inherit" onClick={handleClickSearch}>
             Search
+          </Button>
+          <Button color="inherit" onClick={handleClickStatistics}>
+            Statistics
           </Button>
         </Toolbar>
       </AppBar>

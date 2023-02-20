@@ -1,6 +1,8 @@
 import { Button, Grid, TextField } from "@mui/material";
 import { useState } from "react";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Upload = () => {
   const initialValues = {
@@ -8,7 +10,7 @@ const Upload = () => {
     lastName: "Cosovic",
     email: "mat@cos.com",
     education: "HIGH_SCHOOL",
-    address: "Petra Petrovica 15",
+    address: "Sombor",
     phone: "+14884111",
     lat: 23.4,
     lon: 45.5,
@@ -56,11 +58,13 @@ const Upload = () => {
     formData.append("lon", formValues.lon * 1);
 
     console.log(formData);
-    axios.post("http://localhost:8080/api/storage", formData, {
-      headers: {
-        "content-type": "multipart/form-data",
-      },
-    });
+    axios
+      .post("http://localhost:8080/api/storage", formData, {
+        headers: {
+          "content-type": "multipart/form-data",
+        },
+      })
+      .then(toast("Successfull upload!"));
   };
 
   return (
@@ -116,7 +120,7 @@ const Upload = () => {
         <TextField
           id="address"
           name="address"
-          label="Address"
+          label="City"
           variant="outlined"
           onChange={handleInputChange}
           value={formValues.address}
@@ -170,6 +174,7 @@ const Upload = () => {
           SUBMIT
         </Button>
       </Grid>
+      <ToastContainer />
     </div>
   );
 };

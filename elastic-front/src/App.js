@@ -4,6 +4,7 @@ import Layout from "./Layout";
 import Search from "./Search";
 import Upload from "./Upload";
 import NotFound from "./NotFound";
+import Statistics from "./Statistics";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<Upload />} />
             <Route path="search" element={<Search />} />
+            <Route path="statistics" element={<Statistics />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

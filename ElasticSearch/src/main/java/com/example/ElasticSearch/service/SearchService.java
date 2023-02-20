@@ -53,7 +53,6 @@ public class SearchService {
     private void setResultDataForHighlight(ResultDTO resultDTO, String key, List<String> value) {
         switch (key) {
             case "firstname":
-                System.out.println("USAO OVDE");
                 resultDTO.setFirstName(formatHighlight(value));
                 break;
             case "lastname":
@@ -62,22 +61,33 @@ public class SearchService {
             case "cvContent":
                 resultDTO.setCv(formatHighlight(value));
                 break;
+            case "clContent":
+                resultDTO.setCoverLetter(formatHighlight(value));
+                break;
+            case "education":
+                resultDTO.setEducation(formatHighlight(value));
+                break;
         }
     }
 
     public String formatHighlight(List<String> highlight) {
         StringBuilder stringBuilder = new StringBuilder();
-        highlight.forEach(highlightItem -> stringBuilder.append(highlightItem).append("<br/>"));
+        highlight.forEach(highlightItem -> stringBuilder.append(highlightItem));
         return stringBuilder.toString();
     }
 
     public List<ResultDTO> simpleQuery(String field, String value) {
         HighlightBuilder highlightBuilder = new HighlightBuilder();
         highlightBuilder.preTags("<b>").postTags("</b>");
-        highlightBuilder.field("*");
+        highlightBuilder.field(field);
+
+        QueryBuilder query = createMatchQueryBuilder(field, value);
+
+        BoolQueryBuilder mainBoolQuery = QueryBuilders.boolQuery();
+        mainBoolQuery.should(query);
 
         var searchQuery = new NativeSearchQueryBuilder()
-                .withFilter(createMatchQueryBuilder(field, value))
+                .withQuery(mainBoolQuery)
                 .withHighlightBuilder(highlightBuilder)
                 .build();
 
@@ -87,7 +97,6 @@ public class SearchService {
         for (SearchHit<Applicant> hint : hints){
             Applicant applicant = hint.getContent();
             Map<String, List<String>> highlightFields = hint.getHighlightFields();
-            System.out.println("EVOO ME" + highlightFields);
 
             ResultDTO resultDTO = ResultDTO.builder()
                     .firstName(applicant.getFirstname())
@@ -188,7 +197,9 @@ public class SearchService {
 
         for (SearchHit<Applicant> hint : hints){
             Applicant applicant = hint.getContent();
-            found.add(ResultDTO.builder()
+            Map<String, List<String>> highlightFields = hint.getHighlightFields();
+
+            ResultDTO resultDTO = ResultDTO.builder()
                     .firstName(applicant.getFirstname())
                     .lastName(applicant.getLastname())
                     .phone(applicant.getPhone())
@@ -198,7 +209,9 @@ public class SearchService {
                     .location(applicant.getLocation().toString())
                     .coverLetter(applicant.getClContent())
                     .cv(applicant.getCvContent())
-                    .build());
+                    .build();
+
+            found.add(mapCVIndexToResultData(resultDTO, highlightFields));
         }
 
         return found;

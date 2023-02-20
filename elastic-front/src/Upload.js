@@ -1,6 +1,6 @@
 import { Button, Grid, TextField } from "@mui/material";
 import { useState } from "react";
-import axios, { post } from "axios";
+import axios from "axios";
 
 const Upload = () => {
   const initialValues = {
@@ -40,6 +40,7 @@ const Upload = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    console.log(formValues);
 
     let formData = new FormData();
     formData.append("cv", cv);
@@ -51,8 +52,8 @@ const Upload = () => {
     formData.append("education", formValues.education);
     formData.append("address", formValues.address);
     formData.append("phone", formValues.phone);
-    formData.append("lat", formValues.lat);
-    formData.append("lon", formValues.lon);
+    formData.append("lat", formValues.lat * 1);
+    formData.append("lon", formValues.lon * 1);
 
     console.log(formData);
     axios.post("http://localhost:8080/api/storage", formData, {
@@ -70,6 +71,7 @@ const Upload = () => {
         direction="column"
         justifyContent="space-between"
         alignItems="center"
+        spacing={2}
       >
         <TextField
           id="firstName"

@@ -12,5 +12,4 @@ public class AdvancedQueryFieldDTO {
     private String field;
     private String value;
     private String operator;
-    private Boolean phrase;
 }

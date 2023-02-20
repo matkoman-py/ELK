@@ -129,6 +129,7 @@ public class SearchService {
     public List<ResultDTO> queryLocation(LocationDTO request) {
         ApiResponseDTO apiResponseDTO = getLocationFromAddress(request.getCity());
         System.out.println(apiResponseDTO);
+        System.out.println(request);
 
         var locationFilter = new GeoDistanceQueryBuilder("location")
                 .point(apiResponseDTO.getLatitude(), apiResponseDTO.getLongitude())
